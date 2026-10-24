@@ -1,0 +1,860 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#040a18">
+<title>Wave RP | FiveM Roleplay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#040a18;
+  --bg-2:#071230;
+  --card:rgba(13,28,64,.55);
+  --card-solid:#0b1a3d;
+  --line:rgba(120,170,255,.16);
+  --line-strong:rgba(120,170,255,.34);
+  --blue:#2f6bff;
+  --blue-2:#1b46d6;
+  --cyan:#27d3ff;
+  --ice:#d6ecff;
+  --text:#e8f1ff;
+  --muted:#8fa6c9;
+  --ok:#35e0a1;
+  --bad:#ff6b7d;
+  --f-display:"Unbounded","Arial Black",Impact,sans-serif;
+  --f-body:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px;background:var(--bg)}
+body{
+  margin:0;color:var(--text);font-family:var(--f-body);font-size:17px;line-height:1.65;
+  background:
+    radial-gradient(1100px 600px at 80% -10%,rgba(47,107,255,.22),transparent 60%),
+    radial-gradient(900px 600px at -10% 40%,rgba(39,211,255,.10),transparent 60%),
+    var(--bg);
+  background-attachment:fixed;
+  overflow-x:hidden;
+}
+body::before{ /* jemná mřížka */
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:72px 72px;opacity:.22;
+  mask-image:radial-gradient(ellipse at 50% 30%,#000 10%,transparent 70%);
+  -webkit-mask-image:radial-gradient(ellipse at 50% 30%,#000 10%,transparent 70%);
+}
+a{color:inherit}
+img,svg{max-width:100%}
+.wrap{width:100%;max-width:1160px;margin:0 auto;padding-inline:max(20px,env(safe-area-inset-left,0px)) max(20px,env(safe-area-inset-right,0px));position:relative;z-index:1}
+h1,h2,h3{font-family:var(--f-display);margin:0;line-height:1.08;letter-spacing:-.01em;text-wrap:balance}
+.grad{background:linear-gradient(100deg,var(--ice) 0%,var(--cyan) 45%,var(--blue) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.eyebrow{display:inline-flex;align-items:center;gap:.6rem;font-family:var(--f-mono);font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);margin:0 0 1rem}
+.eyebrow::before{content:"";width:28px;height:2px;background:linear-gradient(90deg,var(--cyan),transparent)}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:6px}
+
+/* ukazatel posunu + kurzor */
+.progress{position:fixed;top:0;left:0;height:3px;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,var(--blue),var(--cyan));z-index:100;box-shadow:0 0 14px var(--cyan)}
+.cursor-glow{position:fixed;left:0;top:0;width:520px;height:520px;margin:-260px 0 0 -260px;border-radius:50%;pointer-events:none;z-index:0;
+  background:radial-gradient(circle,rgba(47,107,255,.20),transparent 62%);will-change:transform;opacity:0;transition:opacity .4s}
+.cursor-glow.on{opacity:1}
+
+/* navigace */
+.nav{position:fixed;inset:0 0 auto 0;z-index:90;padding-top:env(safe-area-inset-top,0px);transition:background .3s,backdrop-filter .3s,border-color .3s;border-bottom:1px solid transparent}
+.nav.solid{background:rgba(4,10,24,.72);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);border-color:var(--line)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;height:72px}
+.brand{display:flex;align-items:center;gap:.7rem;text-decoration:none;font-family:var(--f-display);font-weight:800;font-size:1.05rem;letter-spacing:.02em;text-transform:uppercase}
+.brand svg{width:34px;height:34px;flex:none;filter:drop-shadow(0 0 10px rgba(39,211,255,.6))}
+.menu{display:flex;align-items:center;gap:.3rem;list-style:none;margin:0;padding:0}
+.menu a{display:block;padding:.5rem .85rem;border-radius:99px;text-decoration:none;color:var(--muted);font-weight:600;font-size:.93rem;transition:color .2s,background .2s}
+.menu a:hover{color:var(--text);background:rgba(120,170,255,.08)}
+.menu a.active{color:var(--text);background:rgba(47,107,255,.2)}
+.burger{display:none;width:44px;height:44px;border-radius:12px;border:1px solid var(--line-strong);background:rgba(13,28,64,.6);color:var(--text);cursor:pointer;padding:0;place-items:center}
+.burger span,.burger span::before,.burger span::after{display:block;width:18px;height:2px;background:currentColor;border-radius:2px;position:relative;transition:transform .3s,top .3s,opacity .3s}
+.burger span::before,.burger span::after{content:"";position:absolute;left:0}
+.burger span::before{top:-6px}.burger span::after{top:6px}
+.nav.open .burger span{background:transparent}
+.nav.open .burger span::before{top:0;transform:rotate(45deg)}
+.nav.open .burger span::after{top:0;transform:rotate(-45deg)}
+
+/* tlačítka */
+.btn{--bx:50%;--by:50%;position:relative;display:inline-flex;align-items:center;justify-content:center;gap:.6rem;padding:.95rem 1.5rem;border-radius:14px;border:1px solid var(--line-strong);background:rgba(13,28,64,.5);color:var(--text);font:600 1rem var(--f-body);text-decoration:none;cursor:pointer;overflow:hidden;transition:transform .25s var(--ease),border-color .25s,box-shadow .25s}
+.btn:hover{transform:translateY(-2px);border-color:var(--cyan)}
+.btn.primary{border-color:transparent;background:linear-gradient(120deg,var(--blue),var(--cyan));color:#02101f;box-shadow:0 10px 34px -8px rgba(47,107,255,.8)}
+.btn.primary:hover{box-shadow:0 14px 44px -6px rgba(39,211,255,.8)}
+.btn.primary::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%);transform:translateX(-120%);transition:transform .7s var(--ease)}
+.btn.primary:hover::after{transform:translateX(120%)}
+.btn svg{width:20px;height:20px;flex:none}
+
+/* HERO */
+.hero{position:relative;min-height:100svh;display:flex;align-items:center;padding-block:130px 150px;overflow:hidden;isolation:isolate}
+#waves{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.hero::after{content:"";position:absolute;inset:auto 0 0 0;height:180px;background:linear-gradient(transparent,var(--bg));z-index:1;pointer-events:none}
+.hero .wrap{z-index:2}
+.status{display:inline-flex;align-items:center;gap:.6rem;padding:.45rem 1rem .45rem .8rem;border-radius:99px;border:1px solid var(--line-strong);background:rgba(7,18,48,.65);backdrop-filter:blur(8px);font-size:.85rem;font-weight:600;margin-bottom:1.6rem}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(53,224,161,.7);animation:ping 2s infinite}
+.dot.off{background:var(--bad);animation:none}
+@keyframes ping{70%{box-shadow:0 0 0 12px rgba(53,224,161,0)}100%{box-shadow:0 0 0 0 rgba(53,224,161,0)}}
+.hero h1{font-size:clamp(3rem,11.5vw,8.6rem);font-weight:800;text-transform:uppercase;line-height:.95;letter-spacing:-.03em}
+.hero h1 .ln{display:block}
+.hero h1 .ch{display:inline-block;opacity:0;transform:translateY(.5em) scale(.9);filter:blur(12px);animation:rise .9s var(--ease) forwards;animation-delay:calc(var(--i)*60ms + 200ms)}
+@keyframes rise{to{opacity:1;transform:none;filter:blur(0)}}
+.hero h1 .ln2 .ch{background:linear-gradient(100deg,var(--cyan),var(--blue));-webkit-background-clip:text;background-clip:text;color:transparent}
+.typed{margin:1.6rem 0 0;font-size:clamp(1.1rem,2.6vw,1.6rem);font-weight:600;color:var(--ice);min-height:2.2em}
+.typed b{color:var(--cyan);font-weight:700}
+.typed i{display:inline-block;width:2px;height:1.1em;background:var(--cyan);margin-left:3px;vertical-align:-.15em;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.lead{max-width:58ch;color:var(--muted);font-size:1.1rem;margin:.4rem 0 0}
+.cta{display:flex;flex-wrap:wrap;gap:.9rem;margin-top:2.2rem;align-items:stretch}
+.plate{display:flex;align-items:center;gap:.4rem;border:1px solid var(--line-strong);border-radius:14px;background:rgba(7,18,48,.7);backdrop-filter:blur(8px);padding:.3rem .3rem .3rem 1rem;min-width:0;max-width:100%}
+.plate code{font:500 .92rem var(--f-mono);color:var(--ice);white-space:nowrap;overflow-x:auto;min-width:0;padding-block:.5rem}
+.plate button{flex:none;border:0;border-radius:10px;padding:.7rem 1rem;background:rgba(47,107,255,.25);color:var(--text);font:600 .9rem var(--f-body);cursor:pointer;transition:background .2s}
+.plate button:hover{background:var(--blue)}
+.scroll-hint{position:absolute;left:50%;bottom:34px;transform:translateX(-50%);z-index:2;width:26px;height:42px;border:2px solid var(--line-strong);border-radius:14px}
+.scroll-hint::after{content:"";position:absolute;left:50%;top:8px;width:4px;height:8px;margin-left:-2px;border-radius:2px;background:var(--cyan);animation:wheel 1.8s infinite}
+@keyframes wheel{0%{opacity:0;transform:translateY(0)}30%{opacity:1}100%{opacity:0;transform:translateY(14px)}}
+
+/* běžící pás */
+.marquee{position:relative;z-index:1;border-block:1px solid var(--line);background:rgba(7,18,48,.55);overflow:hidden;padding-block:1.1rem}
+.marquee .track{display:flex;gap:3rem;width:max-content;animation:slide 38s linear infinite}
+.marquee:hover .track{animation-play-state:paused}
+.marquee span{font:800 1.5rem var(--f-display);text-transform:uppercase;white-space:nowrap;color:transparent;-webkit-text-stroke:1px var(--line-strong);display:inline-flex;align-items:center;gap:3rem}
+.marquee span::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:0 0 14px var(--cyan)}
+@keyframes slide{to{transform:translateX(-50%)}}
+
+/* sekce */
+section.s{position:relative;padding-block:clamp(4rem,9vw,7.5rem)}
+.head{margin-bottom:clamp(2rem,5vw,3.5rem);max-width:760px}
+.head h2{font-size:clamp(1.9rem,5vw,3.4rem);font-weight:700}
+.head p{color:var(--muted);margin:1rem 0 0;max-width:60ch}
+
+/* reveal */
+.js .rv{opacity:0;translate:0 34px;transition:opacity .9s var(--ease) var(--d,0ms),translate .9s var(--ease) var(--d,0ms),transform .3s var(--ease),border-color .3s,box-shadow .3s}
+.js .rv.in{opacity:1;translate:0 0}
+
+/* karty se světlem */
+.card{position:relative;border-radius:20px;border:1px solid var(--line);background:var(--card);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:1.7rem;overflow:hidden;--mx:50%;--my:0%;transform-style:preserve-3d}
+.card::before{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(420px circle at var(--mx) var(--my),rgba(39,211,255,.16),transparent 55%);opacity:0;transition:opacity .3s;pointer-events:none}
+.card:hover{border-color:var(--line-strong)}
+.card:hover::before{opacity:1}
+
+/* o nás */
+.about{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:clamp(2rem,5vw,4rem);align-items:start}
+.about p{color:var(--muted);margin:0 0 1rem}
+.about p:first-of-type{color:var(--text);font-size:1.2rem}
+.features{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.ico{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(140deg,rgba(47,107,255,.35),rgba(39,211,255,.12));border:1px solid var(--line-strong);margin-bottom:1rem}
+.ico svg{width:24px;height:24px;stroke:var(--cyan);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.card h3{font-size:1.05rem;margin-bottom:.5rem;font-weight:700}
+.card p{margin:0;color:var(--muted);font-size:.96rem}
+
+/* čísla */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:1px;border:1px solid var(--line);border-radius:22px;overflow:hidden;background:var(--line)}
+.stat{background:rgba(7,18,48,.85);padding:2rem 1.6rem}
+.stat b{display:block;font:800 clamp(2rem,5vw,3.2rem) var(--f-display);line-height:1;font-variant-numeric:tabular-nums}
+.stat span{display:block;margin-top:.7rem;color:var(--muted);font-size:.92rem}
+
+/* postup */
+.timeline{position:relative;display:grid;gap:1.2rem;padding-left:64px;max-width:820px}
+.timeline::before,.timeline .fill{content:"";position:absolute;left:23px;top:8px;bottom:8px;width:2px;background:var(--line);border-radius:2px}
+.timeline .fill{background:linear-gradient(var(--cyan),var(--blue));box-shadow:0 0 12px var(--cyan);transform-origin:top;transform:scaleY(var(--p,0));bottom:8px}
+.step{position:relative}
+.step .n{position:absolute;left:-64px;top:1.2rem;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font:700 1rem var(--f-display);background:var(--bg-2);border:2px solid var(--line-strong);color:var(--muted);transition:all .5s var(--ease);z-index:1}
+.step.in .n{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 22px rgba(39,211,255,.55)}
+.step h3{margin-bottom:.4rem}
+
+/* pravidla */
+.tools{display:flex;flex-wrap:wrap;gap:.8rem;align-items:center;margin-bottom:1.6rem}
+.tabs{display:flex;flex-wrap:wrap;gap:.5rem}
+.tab,.chip{border:1px solid var(--line);background:rgba(13,28,64,.5);color:var(--muted);border-radius:99px;padding:.55rem 1.1rem;font:600 .92rem var(--f-body);cursor:pointer;transition:all .25s var(--ease)}
+.tab:hover,.chip:hover{color:var(--text);border-color:var(--line-strong)}
+.tab[aria-selected="true"],.chip[aria-pressed="true"]{color:#02101f;background:linear-gradient(120deg,var(--blue),var(--cyan));border-color:transparent;box-shadow:0 8px 24px -8px rgba(47,107,255,.9)}
+.search{margin-left:auto;position:relative;flex:1 1 220px;max-width:340px}
+.search input{width:100%;padding:.7rem 1rem .7rem 2.7rem;border-radius:99px;border:1px solid var(--line);background:rgba(7,18,48,.7);color:var(--text);font:500 .95rem var(--f-body)}
+.search input::placeholder{color:var(--muted)}
+.search input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(39,211,255,.2)}
+.search svg{position:absolute;left:1rem;top:50%;translate:0 -50%;width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round}
+.rules{display:grid;gap:.8rem;counter-reset:r}
+.rule{counter-increment:r;display:grid;grid-template-columns:auto minmax(0,1fr);gap:1.1rem;align-items:start;padding:1.15rem 1.3rem;border-radius:16px;border:1px solid var(--line);background:var(--card);animation:fadeUp .5s var(--ease) both;animation-delay:calc(var(--i)*45ms);transition:border-color .25s,transform .25s var(--ease)}
+.rule:hover{border-color:var(--line-strong);transform:translateX(4px)}
+.rule::before{content:counter(r,decimal-leading-zero);font:500 .85rem var(--f-mono);color:var(--cyan);padding-top:.25rem}
+.rule b{display:block;font-weight:700;margin-bottom:.15rem}
+.rule span{color:var(--muted);font-size:.97rem}
+.rule em{font:500 .7rem var(--f-mono);font-style:normal;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-left:.6rem;opacity:.9}
+.empty{padding:2.5rem;text-align:center;color:var(--muted);border:1px dashed var(--line-strong);border-radius:16px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* frakce */
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.6rem}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:1.1rem}
+.faction{display:flex;flex-direction:column;gap:.9rem;min-width:0;animation:fadeUp .5s var(--ease) both;animation-delay:calc(var(--i)*60ms)}
+.faction .top{display:flex;justify-content:space-between;align-items:center;gap:.8rem}
+.faction .type{font:500 .72rem var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
+.faction h3{font-size:1.35rem}
+.pill{display:inline-flex;align-items:center;gap:.45rem;padding:.25rem .75rem;border-radius:99px;font-size:.78rem;font-weight:700;border:1px solid currentColor;white-space:nowrap}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.open{color:var(--ok);background:rgba(53,224,161,.08)}
+.pill.closed{color:var(--bad);background:rgba(255,107,125,.08)}
+.faction dl{margin:auto 0 0;padding-top:1rem;border-top:1px dashed var(--line-strong);display:grid;gap:.4rem;font-size:.9rem}
+.faction dl div{display:flex;justify-content:space-between;gap:1rem}
+.faction dt{color:var(--muted)}
+.faction dd{margin:0;text-align:right;font-weight:600}
+.cap{height:6px;border-radius:6px;background:rgba(120,170,255,.14);overflow:hidden;margin-top:.1rem}
+.cap i{display:block;height:100%;width:var(--w,0%);background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:6px;transform-origin:left;animation:grow 1.2s var(--ease) both}
+@keyframes grow{from{transform:scaleX(0)}}
+
+/* novinky */
+.news{display:grid;gap:1rem}
+.post{display:grid;grid-template-columns:130px minmax(0,1fr);gap:1.4rem;align-items:start}
+.post time{font:500 .85rem var(--f-mono);color:var(--cyan);padding-top:.2rem}
+.post h3{font-size:1.1rem;margin-bottom:.4rem}
+
+/* tým */
+.team{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:1.1rem}
+.member{display:flex;align-items:center;gap:1rem;min-width:0}
+.avatar{flex:none;width:58px;height:58px;border-radius:18px;display:grid;place-items:center;font:800 1.4rem var(--f-display);color:#02101f;background:linear-gradient(135deg,var(--cyan),var(--blue));box-shadow:0 8px 24px -8px rgba(39,211,255,.7)}
+.member b{display:block;overflow-wrap:anywhere}
+.member span{color:var(--muted);font-size:.9rem}
+
+/* discord */
+.cta-box{position:relative;border-radius:28px;overflow:hidden;border:1px solid var(--line-strong);padding:clamp(2rem,7vw,5rem);isolation:isolate;
+  background:radial-gradient(800px 400px at 85% 0%,rgba(39,211,255,.28),transparent 60%),linear-gradient(135deg,#0a1f5c,#071230 60%)}
+.cta-box::before{content:"";position:absolute;inset:-40%;z-index:-1;background:conic-gradient(from 0deg,transparent,rgba(47,107,255,.35),transparent 30%);animation:spin 14s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.cta-box h2{font-size:clamp(2rem,6vw,4rem);max-width:15ch}
+.cta-box p{color:var(--ice);opacity:.85;max-width:52ch;margin:1.2rem 0 2rem}
+
+footer{position:relative;z-index:1;border-top:1px solid var(--line);padding-block:2.2rem calc(2.2rem + env(safe-area-inset-bottom,0px));color:var(--muted);font-size:.9rem}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:1rem}
+
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));translate:-50% 30px;opacity:0;z-index:120;padding:.8rem 1.3rem;border-radius:14px;background:var(--card-solid);border:1px solid var(--cyan);box-shadow:0 12px 40px rgba(0,0,0,.5);font-weight:600;transition:all .4s var(--ease);pointer-events:none}
+.toast.on{opacity:1;translate:-50% 0}
+
+@media (max-width:900px){
+  .about{grid-template-columns:minmax(0,1fr)}
+  .burger{display:grid}
+  .menu{position:fixed;inset:0 0 auto 0;top:calc(72px + env(safe-area-inset-top,0px));flex-direction:column;align-items:stretch;gap:.2rem;padding:1rem max(20px,env(safe-area-inset-left,0px)) 1.4rem;background:rgba(4,10,24,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);translate:0 -12px;opacity:0;visibility:hidden;transition:all .3s var(--ease)}
+  .nav.open .menu{translate:0 0;opacity:1;visibility:visible}
+  .nav.open{background:rgba(4,10,24,.96)}
+  .menu a{padding:.9rem 1rem;font-size:1.05rem}
+}
+@media (max-width:620px){
+  .features{grid-template-columns:minmax(0,1fr)}
+  .post{grid-template-columns:minmax(0,1fr);gap:.3rem}
+  .timeline{padding-left:54px}
+  .step .n{left:-54px;width:42px;height:42px}
+  .timeline::before,.timeline .fill{left:20px}
+  .search{max-width:none;margin-left:0}
+  .hero{padding-block:110px 130px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  .marquee .track{animation:none}
+}
+</style>
+</head>
+<body>
+
+<script>
+/* =====================================================================
+   ZDE UPRAVUJETE WEB
+   Měňte jen texty, odkazy a seznamy v CONFIG níže. Uložte soubor
+   a obnovte stránku. Všechny ukázkové texty a čísla přepište svými.
+   ===================================================================== */
+const CONFIG = {
+  serverName: "Wave RP",                 // název serveru (každé slovo bude na vlastním řádku v hlavním nadpisu)
+  tagline: "Český FiveM roleplay server s vlastním příběhem, fungující ekonomikou a komunitou, která se nehoní za rychlým zážitkem.",
+  rotatingWords: ["Příběhy, které se pamatují.", "Frakce s vlastním vedením.", "Ekonomika, kterou tvoříte vy.", "Komunita bez toxicity."],
+
+  connect: "connect cfx.re/join/abc123",   // příkaz do F8 konzole, nebo např. "connect 123.45.67.89:30120"
+  cfxId: "",                               // volitelné: kód serveru z cfx.re/join/KÓD, pro zobrazení živého počtu hráčů (když nefunguje, použijí se čísla níže)
+  discordUrl: "https://discord.gg/TVUJ-ODKAZ",
+  discordTitle: "Přidej se k nám na Discord",
+  discordText: "Tady najdeš whitelist, žádosti do frakcí, novinky ze serveru a lidi, se kterými si zahraješ. Nejrychlejší cesta k první postavě.",
+
+  statusText: "Server běží",              // text u zelené tečky, když živý počet hráčů není dostupný
+  maxPlayers: 128,
+
+  marquee: ["Whitelist", "Vlastní skripty", "Ekonomika", "Frakce", "Příběhy", "Čeština", "Komunita", "Eventy"],
+
+  about: [
+    "Wave RP je seriózní roleplay server pro lidi, kteří chtějí hrát postavu, ne jen střílet.",
+    "Máme vlastní skripty, aktivní tým a pravidla, která se dají dodržet. Každá postava má minulost, práci a následky svých rozhodnutí. Hrajeme česky a očekáváme od sebe slušnost i mimo hru."
+  ],
+  // icon: mic | car | users | shield | coin | bolt
+  features: [
+    { icon: "mic",    title: "Hra hlasem",       text: "Plnohodnotný roleplay s mikrofonem. Žádné psaní do chatu místo hraní." },
+    { icon: "users",  title: "Živé frakce",      text: "Policie, EMS, gangy i podnikatelé. Každá frakce má vlastní vedení." },
+    { icon: "coin",   title: "Reálná ekonomika", text: "Práce, firmy, nemovitosti a ceny, které se mění podle hráčů." },
+    { icon: "shield", title: "Férový tým",       text: "Administrátoři jsou k dispozici a řeší spory podle jasných pravidel." }
+  ],
+
+  // value = číslo, suffix = přípona (např. "+")
+  stats: [
+    { value: 2400, suffix: "+", label: "Registrovaných hráčů" },
+    { value: 36,   suffix: "",  label: "Aktivních frakcí" },
+    { value: 150,  suffix: "+", label: "Vlastních skriptů" },
+    { value: 24,   suffix: "/7", label: "Dohled týmu" }
+  ],
+
+  steps: [
+    ["Vstup na Discord", "Přečti si kanál s pravidly a potvrď, že je bereš na vědomí."],
+    ["Podej žádost o whitelist", "Napiš postavu, její příběh a krátce, proč chceš hrát u nás."],
+    ["Počkej na schválení", "Obvykle do 48 hodin. Ozveme se ti na Discordu."],
+    ["Spusť FiveM a připoj se", "Otevři F8 konzoli a vlož příkaz pro připojení z horní části stránky."]
+  ],
+
+  rules: [
+    {
+      title: "Obecná",
+      items: [
+        ["Respekt", "K hráčům i týmu se chováme slušně. Urážky a nenávistné projevy znamenají okamžitý ban."],
+        ["Žádné cheaty", "Mody dávající výhodu, makra a zneužívání bugů se trestají trvalým banem."],
+        ["Mikrofon", "Hra probíhá hlasem. Textový chat nepoužívej k domlouvání mimo roleplay."],
+        ["Počet postav", "Jeden hráč může mít nejvýše dvě aktivní postavy."]
+      ]
+    },
+    {
+      title: "Roleplay",
+      items: [
+        ["Fail RP", "Nehraj nic, co by se ve skutečném světě nemohlo stát. Žádné skoky ze střech bez následků."],
+        ["Metagaming", "Informace získané mimo postavu (stream, Discord) nesmíš použít ve hře."],
+        ["Powergaming", "Nenutíš ostatním akce a nehraješ za jejich postavu."],
+        ["Hodnota života (NLR)", "Po smrti zapomínáš, co k ní vedlo, a na místo se 15 minut nevracíš."]
+      ]
+    },
+    {
+      title: "Zločin",
+      items: [
+        ["Důvod konfliktu", "Každé přepadení nebo střelba musí mít důvod v příběhu postavy."],
+        ["Rukojmí", "Rukojmí musí být ochotné hrát. Jedno rukojmí na akci, bez týrání mimo roleplay."],
+        ["Limity zásahů", "Počet zúčastněných na loupeži určuje její typ. Seznam je v kanálu #zlocin."],
+        ["Safe zóny", "V nemocnici, na policejní stanici a v bytech se nestřílí a nepřepadává."]
+      ]
+    }
+  ],
+
+  // type: Složka / Práce / Gang (podle toho se filtruje), filled = kolik je obsazeno z místa (např. 9 z 12)
+  factions: [
+    { name: "Policie (LSPD)",       type: "Složka", desc: "Udržují pořádek ve městě. Hlídky, vyšetřování a výslechy, které dávají smysl.", open: true,  filled: 9,  slots: 12, req: "18+, čistý rejstřík, pohovor" },
+    { name: "Záchranka (EMS)",      type: "Složka", desc: "Lékaři, záchranáři a hasiči. Práce v noci, na silnici i v nemocnici.",          open: true,  filled: 5,  slots: 8,  req: "16+, mikrofon, krátký test" },
+    { name: "Mechanici",            type: "Práce",  desc: "Servis, tuning a odtahovka. Vlastní dílna a zákazníci z celého města.",         open: true,  filled: 4,  slots: 10, req: "Whitelist" },
+    { name: "Taxi a doprava",       type: "Práce",  desc: "Vozíš lidi, kam potřebují. Dobrý start pro seznámení s městem i hráči.",        open: true,  filled: 3,  slots: 12, req: "Whitelist" },
+    { name: "Vagos",                type: "Gang",   desc: "Ulice, území a vlastní pravidla. Vedení vybírá členy podle příběhu postavy.",  open: false, filled: 15, slots: 15, req: "Pozvánka od vedení" },
+    { name: "Reality a podnikání",  type: "Práce",  desc: "Prodej nemovitostí, kluby a obchody. Pro postavy, které chtějí budovat impérium.", open: false, filled: 6, slots: 6, req: "Žádost o provozovnu" }
+  ],
+
+  news: [
+    { date: "24. 10. 2026", title: "Nová sezóna a restart ekonomiky", text: "Startujeme novou sezónu. Postavy zůstávají, ceny a nemovitosti se přepočítaly. Detaily najdeš na Discordu." },
+    { date: "10. 10. 2026", title: "Otevřený nábor do EMS", text: "Záchranka hledá nové lékaře a záchranáře. Stačí krátký test a pohovor s vedením." },
+    { date: "28. 9. 2026",  title: "Víkendový event na pláži", text: "Závody, soutěže a vyhlášení nejlepšího příběhu měsíce. Vstup je zdarma pro všechny se schváleným whitelistem." }
+  ],
+
+  team: [
+    ["Majitel", "Zakladatel serveru"],
+    ["Admin1", "Hlavní administrátor"],
+    ["Admin2", "Správce frakcí"],
+    ["Moderátor1", "Dohled nad hrou"]
+  ],
+
+  footer: "Server není nijak spojen s Rockstar Games ani Take-Two Interactive."
+};
+</script>
+
+<div class="progress" id="progress"></div>
+<div class="cursor-glow" id="glow"></div>
+
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="#domu" aria-label="Domů">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#27d3ff"/><stop offset="1" stop-color="#2f6bff"/></linearGradient></defs><rect x="1.5" y="1.5" width="37" height="37" rx="11" fill="#071230" stroke="url(#lg)" stroke-width="2"/><path d="M6 22c4-7 8-7 12 0s8 7 12 0 4-3 4-3" fill="none" stroke="url(#lg)" stroke-width="3" stroke-linecap="round"/><path d="M6 29c4-5 8-5 12 0s8 5 12 0" fill="none" stroke="url(#lg)" stroke-width="2" stroke-linecap="round" opacity=".55"/></svg>
+      <span id="brand-name"></span>
+    </a>
+    <ul class="menu" id="menu">
+      <li><a href="#o-nas">O serveru</a></li>
+      <li><a href="#pripojeni">Připojení</a></li>
+      <li><a href="#pravidla">Pravidla</a></li>
+      <li><a href="#frakce">Frakce</a></li>
+      <li><a href="#novinky">Novinky</a></li>
+      <li><a href="#tym">Tým</a></li>
+    </ul>
+    <button class="burger" id="burger" type="button" aria-label="Menu" aria-expanded="false"><span></span></button>
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="domu">
+    <canvas id="waves" aria-hidden="true"></canvas>
+    <div class="wrap">
+      <div class="status"><i class="dot" id="dot"></i><span id="status-text"></span></div>
+      <h1 id="title" aria-label=""></h1>
+      <p class="typed" aria-live="polite"><b id="typed"></b><i></i></p>
+      <p class="lead" id="tagline"></p>
+      <div class="cta">
+        <div class="plate" role="group" aria-label="Příkaz pro připojení">
+          <code id="connect"></code>
+          <button type="button" id="copy">Kopírovat</button>
+        </div>
+        <a class="btn primary" id="hero-discord" href="#discord" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.3 4.4A17 17 0 0 0 16 3l-.2.4a15 15 0 0 1 3.7 1.9 13 13 0 0 0-15 0A15 15 0 0 1 8.200 3.400L8 3a17 17 0 0 0-4.300 1.400C1 8.500.300 12.500.600 16.400a17 17 0 0 0 5.200 2.600l1.100-1.800a11 11 0 0 1-1.700-.8l.4-.3a12 12 0 0 0 10.800 0l.4.300c-.5.300-1.100.6-1.700.8l1.100 1.800a17 17 0 0 0 5.200-2.600c.4-4.500-.7-8.500-3.100-12zM8.700 14c-1 0-1.800-.9-1.800-2s.8-2 1.800-2 1.800.9 1.800 2-.8 2-1.800 2zm6.600 0c-1 0-1.800-.9-1.800-2s.8-2 1.800-2 1.800.9 1.800 2-.8 2-1.800 2z"/></svg>
+          Discord
+        </a>
+      </div>
+    </div>
+    <div class="scroll-hint" aria-hidden="true"></div>
+  </section>
+
+  <div class="marquee" aria-hidden="true"><div class="track" id="marquee"></div></div>
+
+  <section class="s" id="o-nas">
+    <div class="wrap">
+      <div class="about">
+        <div class="rv" id="about">
+          <p class="eyebrow">O serveru</p>
+        </div>
+        <div class="features" id="features"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="s" style="padding-top:0">
+    <div class="wrap"><div class="stats rv" id="stats"></div></div>
+  </section>
+
+  <section class="s" id="pripojeni">
+    <div class="wrap">
+      <div class="head rv">
+        <p class="eyebrow">Jak začít</p>
+        <h2>Čtyři kroky <span class="grad">k tvé postavě</span></h2>
+      </div>
+      <div class="timeline" id="timeline"><div class="fill" id="tl-fill"></div></div>
+    </div>
+  </section>
+
+  <section class="s" id="pravidla">
+    <div class="wrap">
+      <div class="head rv">
+        <p class="eyebrow">Před hraním</p>
+        <h2>Pravidla <span class="grad">serveru</span></h2>
+        <p>Přečti si je celá. Neznalost pravidel neomlouvá.</p>
+      </div>
+      <div class="tools rv">
+        <div class="tabs" id="tabs" role="tablist" aria-label="Kategorie pravidel"></div>
+        <label class="search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.500-3.500"/></svg>
+          <input id="q" type="search" placeholder="Hledat v pravidlech" aria-label="Hledat v pravidlech" autocomplete="off">
+        </label>
+      </div>
+      <div class="rules" id="rules" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="s" id="frakce">
+    <div class="wrap">
+      <div class="head rv">
+        <p class="eyebrow">Kam patřit</p>
+        <h2>Frakce <span class="grad">a práce</span></h2>
+        <p>Zelená značka znamená otevřený nábor. Žádost podáváš na Discordu.</p>
+      </div>
+      <div class="chips rv" id="chips"></div>
+      <div class="fgrid" id="factions"></div>
+    </div>
+  </section>
+
+  <section class="s" id="novinky">
+    <div class="wrap">
+      <div class="head rv">
+        <p class="eyebrow">Co je nového</p>
+        <h2>Novinky <span class="grad">ze serveru</span></h2>
+      </div>
+      <div class="news" id="news"></div>
+    </div>
+  </section>
+
+  <section class="s" id="tym">
+    <div class="wrap">
+      <div class="head rv">
+        <p class="eyebrow">Lidé za serverem</p>
+        <h2>Náš <span class="grad">tým</span></h2>
+      </div>
+      <div class="team" id="team"></div>
+    </div>
+  </section>
+
+  <section class="s" id="discord">
+    <div class="wrap">
+      <div class="cta-box rv">
+        <p class="eyebrow">Komunita</p>
+        <h2 id="discord-title"></h2>
+        <p id="discord-text"></p>
+        <a class="btn primary" id="discord-link" href="#" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.3 4.4A17 17 0 0 0 16 3l-.2.4a15 15 0 0 1 3.7 1.9 13 13 0 0 0-15 0A15 15 0 0 1 8.200 3.400L8 3a17 17 0 0 0-4.300 1.400C1 8.500.300 12.500.600 16.400a17 17 0 0 0 5.200 2.600l1.100-1.800a11 11 0 0 1-1.700-.8l.4-.3a12 12 0 0 0 10.800 0l.4.300c-.5.300-1.100.6-1.700.8l1.100 1.800a17 17 0 0 0 5.200-2.600c.4-4.500-.7-8.500-3.100-12zM8.700 14c-1 0-1.800-.9-1.800-2s.8-2 1.800-2 1.800.9 1.800 2-.8 2-1.800 2zm6.600 0c-1 0-1.800-.9-1.800-2s.8-2 1.800-2 1.800.9 1.800 2-.8 2-1.800 2z"/></svg>
+          Otevřít Discord
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span id="footer-name"></span>
+    <span id="footer-note"></span>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* Níže je kód, který z nastavení nahoře poskládá a rozpohybuje stránku. Není potřeba ho měnit. */
+(function(){
+  document.documentElement.classList.add("js");
+  var C = CONFIG;
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var $ = function(id){ return document.getElementById(id); };
+  function el(tag, cls, text){ var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function toast(msg){ var t = $("toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(function(){ t.classList.remove("on"); }, 2200); }
+
+  var ICONS = {
+    mic:    '<path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
+    car:    '<path d="M5 16V11l2-5h10l2 5v5M3 16h18M7 16v2M17 16v2"/><circle cx="8" cy="13" r=".8"/><circle cx="16" cy="13" r=".8"/>',
+    users:  '<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 5a3 3 0 0 1 0 6M18 14a6 6 0 0 1 3 6"/>',
+    shield: '<path d="M12 3 4 6v6c0 4.500 3.400 7.600 8 9 4.600-1.400 8-4.500 8-9V6l-8-3z"/><path d="m9 12 2 2 4-4"/>',
+    coin:   '<circle cx="12" cy="12" r="9"/><path d="M14.500 9a3 3 0 0 0-5 1.500c0 3 5 1.500 5 4.500a3 3 0 0 1-5 1.500M12 6.500V8m0 8v1.500"/>',
+    bolt:   '<path d="M13 3 5 13h6l-1 8 8-10h-6l1-8z"/>'
+  };
+
+  /* ---------- texty a odkazy ---------- */
+  document.title = C.serverName + " | FiveM Roleplay";
+  $("brand-name").textContent = C.serverName;
+  $("tagline").textContent = C.tagline;
+  $("connect").textContent = C.connect;
+  $("status-text").textContent = C.statusText;
+  $("discord-title").textContent = C.discordTitle;
+  $("discord-text").textContent = C.discordText;
+  $("footer-name").textContent = "© " + new Date().getFullYear() + " " + C.serverName;
+  $("footer-note").textContent = C.footer;
+  $("hero-discord").href = C.discordUrl;
+  $("discord-link").href = C.discordUrl;
+
+  /* nadpis po písmenech */
+  var h1 = $("title"), idx = 0;
+  h1.setAttribute("aria-label", C.serverName);
+  C.serverName.trim().split(/\s+/).forEach(function(word, li, arr){
+    var ln = el("span", "ln ln" + (li === arr.length - 1 && arr.length > 1 ? "2" : "1"));
+    ln.setAttribute("aria-hidden", "true");
+    word.split("").forEach(function(c){ var s = el("span", "ch", c); s.style.setProperty("--i", idx++); ln.appendChild(s); });
+    h1.appendChild(ln);
+  });
+
+  /* psací stroj */
+  (function(){
+    var words = C.rotatingWords || [], out = $("typed");
+    if (!words.length) return;
+    if (reduce) { out.textContent = words[0]; return; }
+    var w = 0, c = 0, del = false;
+    (function tick(){
+      var full = words[w];
+      out.textContent = full.slice(0, c);
+      var delay = del ? 28 : 55;
+      if (!del && c === full.length) { del = true; delay = 1800; }
+      else if (del && c === 0) { del = false; w = (w + 1) % words.length; delay = 350; }
+      else c += del ? -1 : 1;
+      setTimeout(tick, delay);
+    })();
+  })();
+
+  /* běžící pás */
+  (function(){
+    var track = $("marquee");
+    for (var r = 0; r < 4; r++) C.marquee.forEach(function(t){ track.appendChild(el("span", null, t)); });
+  })();
+
+  /* o nás */
+  C.about.forEach(function(t){ $("about").appendChild(el("p", null, t)); });
+  C.features.forEach(function(f, i){
+    var card = el("div", "card rv tilt");
+    card.style.setProperty("--d", (i * 90) + "ms");
+    var ico = el("div", "ico");
+    ico.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + (ICONS[f.icon] || ICONS.bolt) + '</svg>';
+    card.appendChild(ico);
+    card.appendChild(el("h3", null, f.title));
+    card.appendChild(el("p", null, f.text));
+    $("features").appendChild(card);
+  });
+
+  /* čísla */
+  C.stats.forEach(function(s){
+    var box = el("div", "stat");
+    var b = el("b", null, "0");
+    b.dataset.to = s.value; b.dataset.suffix = s.suffix || "";
+    box.appendChild(b);
+    box.appendChild(el("span", null, s.label));
+    $("stats").appendChild(box);
+  });
+
+  /* postup */
+  C.steps.forEach(function(s, i){
+    var st = el("div", "step card rv");
+    st.style.setProperty("--d", "0ms");
+    st.appendChild(el("div", "n", String(i + 1)));
+    st.appendChild(el("h3", null, s[0]));
+    st.appendChild(el("p", null, s[1]));
+    $("timeline").appendChild(st);
+  });
+
+  /* pravidla */
+  (function(){
+    var cats = ["Vše"].concat(C.rules.map(function(c){ return c.title; }));
+    var state = { cat: 0, q: "" };
+    var tabs = $("tabs"), list = $("rules"), input = $("q");
+    cats.forEach(function(name, i){
+      var b = el("button", "tab", name);
+      b.type = "button"; b.setAttribute("role", "tab");
+      b.setAttribute("aria-selected", i === 0 ? "true" : "false");
+      b.addEventListener("click", function(){
+        state.cat = i;
+        Array.prototype.forEach.call(tabs.children, function(t, k){ t.setAttribute("aria-selected", k === i ? "true" : "false"); });
+        render();
+      });
+      tabs.appendChild(b);
+    });
+    function render(){
+      list.textContent = "";
+      var q = state.q.trim().toLowerCase(), n = 0;
+      C.rules.forEach(function(cat, ci){
+        if (state.cat !== 0 && state.cat - 1 !== ci) return;
+        cat.items.forEach(function(r){
+          if (q && (r[0] + " " + r[1]).toLowerCase().indexOf(q) === -1) return;
+          var row = el("div", "rule"); row.style.setProperty("--i", n++);
+          var box = el("div");
+          var t = el("b", null, r[0]);
+          if (state.cat === 0) t.appendChild(el("em", null, cat.title));
+          box.appendChild(t); box.appendChild(el("span", null, r[1]));
+          row.appendChild(box); list.appendChild(row);
+        });
+      });
+      if (!n) list.appendChild(el("div", "empty", "Nic jsme nenašli. Zkus jiné slovo."));
+    }
+    input.addEventListener("input", function(){ state.q = input.value; render(); });
+    render();
+  })();
+
+  /* frakce */
+  (function(){
+    var types = ["Vše"]; C.factions.forEach(function(f){ if (types.indexOf(f.type) < 0) types.push(f.type); });
+    var cur = "Vše", chips = $("chips"), grid = $("factions");
+    types.forEach(function(t){
+      var b = el("button", "chip", t); b.type = "button";
+      b.setAttribute("aria-pressed", t === cur ? "true" : "false");
+      b.addEventListener("click", function(){
+        cur = t;
+        Array.prototype.forEach.call(chips.children, function(c){ c.setAttribute("aria-pressed", c.textContent === t ? "true" : "false"); });
+        render();
+      });
+      chips.appendChild(b);
+    });
+    function render(){
+      grid.textContent = ""; var n = 0;
+      C.factions.forEach(function(f){
+        if (cur !== "Vše" && f.type !== cur) return;
+        var card = el("article", "card faction tilt"); card.style.setProperty("--i", n++);
+        var top = el("div", "top");
+        top.appendChild(el("span", "type", f.type));
+        top.appendChild(el("span", "pill " + (f.open ? "open" : "closed"), f.open ? "Nábor otevřen" : "Nábor zavřen"));
+        card.appendChild(top);
+        card.appendChild(el("h3", null, f.name));
+        card.appendChild(el("p", null, f.desc));
+        var cap = el("div", "cap"); var bar = el("i");
+        bar.style.setProperty("--w", Math.min(100, Math.round(f.filled / f.slots * 100)) + "%");
+        cap.appendChild(bar); card.appendChild(cap);
+        var dl = el("dl");
+        [["Obsazeno", f.filled + " / " + f.slots], ["Požadavky", f.req]].forEach(function(r){
+          var row = el("div"); row.appendChild(el("dt", null, r[0])); row.appendChild(el("dd", null, r[1])); dl.appendChild(row);
+        });
+        card.appendChild(dl); grid.appendChild(card);
+        bindCard(card);
+      });
+    }
+    render();
+  })();
+
+  /* novinky */
+  C.news.forEach(function(p, i){
+    var card = el("article", "card post rv"); card.style.setProperty("--d", (i * 90) + "ms");
+    card.appendChild(el("time", null, p.date));
+    var box = el("div"); box.appendChild(el("h3", null, p.title)); box.appendChild(el("p", null, p.text));
+    card.appendChild(box); $("news").appendChild(card); bindCard(card);
+  });
+
+  /* tým */
+  C.team.forEach(function(m, i){
+    var card = el("div", "card member rv tilt"); card.style.setProperty("--d", (i * 80) + "ms");
+    card.appendChild(el("div", "avatar", m[0].charAt(0).toUpperCase()));
+    var t = el("div"); t.appendChild(el("b", null, m[0])); t.appendChild(el("span", null, m[1]));
+    card.appendChild(t); $("team").appendChild(card);
+  });
+
+  /* ---------- světlo na kartách + náklon ---------- */
+  function bindCard(card){
+    card.addEventListener("pointermove", function(e){
+      var r = card.getBoundingClientRect();
+      var x = e.clientX - r.left, y = e.clientY - r.top;
+      card.style.setProperty("--mx", x + "px"); card.style.setProperty("--my", y + "px");
+      if (!reduce && card.classList.contains("tilt") && e.pointerType === "mouse") {
+        var rx = ((y / r.height) - .5) * -6, ry = ((x / r.width) - .5) * 6;
+        card.style.transform = "perspective(900px) rotateX(" + rx.toFixed(2) + "deg) rotateY(" + ry.toFixed(2) + "deg)";
+      }
+    });
+    card.addEventListener("pointerleave", function(){ card.style.transform = ""; });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".card"), bindCard);
+
+  /* ---------- zjevení při posunu ---------- */
+  var io = "IntersectionObserver" in window ? new IntersectionObserver(function(es){
+    es.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+  }, { threshold: .12, rootMargin: "0px 0px -6% 0px" }) : null;
+  Array.prototype.forEach.call(document.querySelectorAll(".rv"), function(n){ if (io) io.observe(n); else n.classList.add("in"); });
+
+  /* počítání čísel */
+  function fmt(n){ return n.toLocaleString("cs-CZ"); }
+  function countUp(b){
+    var to = +b.dataset.to, suf = b.dataset.suffix, t0 = null, dur = 1600;
+    if (reduce) { b.textContent = fmt(to) + suf; return; }
+    (function step(ts){
+      if (!t0) t0 = ts;
+      var p = Math.min(1, (ts - t0) / dur), e = 1 - Math.pow(1 - p, 4);
+      b.textContent = fmt(Math.round(to * e)) + suf;
+      if (p < 1) requestAnimationFrame(step);
+    })(performance.now());
+  }
+  var statIO = "IntersectionObserver" in window ? new IntersectionObserver(function(es){
+    es.forEach(function(e){ if (e.isIntersecting) { Array.prototype.forEach.call(e.target.querySelectorAll("b"), countUp); statIO.disconnect(); } });
+  }, { threshold: .4 }) : null;
+  if (statIO) statIO.observe($("stats")); else Array.prototype.forEach.call($("stats").querySelectorAll("b"), countUp);
+
+  /* ---------- navigace, posun, kurzor ---------- */
+  var nav = $("nav"), prog = $("progress"), fill = $("tl-fill"), tl = $("timeline");
+  var links = Array.prototype.slice.call(document.querySelectorAll(".menu a"));
+  var secs = links.map(function(a){ return document.querySelector(a.getAttribute("href")); });
+  function onScroll(){
+    var y = window.scrollY, h = document.documentElement.scrollHeight - window.innerHeight;
+    nav.classList.toggle("solid", y > 24);
+    prog.style.transform = "scaleX(" + (h > 0 ? y / h : 0) + ")";
+    var r = tl.getBoundingClientRect(), vh = window.innerHeight;
+    var p = Math.max(0, Math.min(1, (vh * .62 - r.top) / r.height));
+    fill.style.setProperty("--p", p.toFixed(3));
+    var cur = -1;
+    secs.forEach(function(s, i){ if (s && s.getBoundingClientRect().top <= vh * .35) cur = i; });
+    links.forEach(function(a, i){ a.classList.toggle("active", i === cur); });
+    var steps = tl.querySelectorAll(".step");
+    Array.prototype.forEach.call(steps, function(st){
+      var sr = st.getBoundingClientRect();
+      st.classList.toggle("in", sr.top < vh * .66 && st.classList.contains("in") || sr.top < vh * .66);
+    });
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll);
+  onScroll();
+
+  $("burger").addEventListener("click", function(){
+    var o = nav.classList.toggle("open"); this.setAttribute("aria-expanded", o ? "true" : "false");
+  });
+  links.forEach(function(a){ a.addEventListener("click", function(){ nav.classList.remove("open"); $("burger").setAttribute("aria-expanded", "false"); }); });
+
+  var glow = $("glow");
+  if (!reduce && window.matchMedia("(hover:hover)").matches) {
+    var gx = innerWidth / 2, gy = innerHeight / 3, tx = gx, ty = gy;
+    window.addEventListener("pointermove", function(e){ tx = e.clientX; ty = e.clientY; glow.classList.add("on"); }, { passive: true });
+    (function loop(){ gx += (tx - gx) * .12; gy += (ty - gy) * .12; glow.style.transform = "translate(" + gx.toFixed(1) + "px," + gy.toFixed(1) + "px)"; requestAnimationFrame(loop); })();
+  }
+
+  /* ---------- kopírování ---------- */
+  $("copy").addEventListener("click", function(){
+    function fallback(){
+      var r = document.createRange(); r.selectNodeContents($("connect"));
+      var s = getSelection(); s.removeAllRanges(); s.addRange(r);
+      toast("Označeno, stiskni Ctrl+C");
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(C.connect).then(function(){ toast("Příkaz zkopírován"); }, fallback);
+    else fallback();
+  });
+
+  /* ---------- živý počet hráčů (volitelně) ---------- */
+  if (C.cfxId) {
+    fetch("https://servers-frontend.fivem.net/api/servers/single/" + encodeURIComponent(C.cfxId))
+      .then(function(r){ if (!r.ok) throw 0; return r.json(); })
+      .then(function(j){
+        var d = j && j.Data; if (!d) return;
+        $("status-text").textContent = d.clients + " / " + (d.sv_maxclients || C.maxPlayers) + " hráčů online";
+      })
+      .catch(function(){ /* zůstane statusText */ });
+  }
+
+  /* ---------- vlny na pozadí hero ---------- */
+  (function(){
+    var cv = $("waves"), ctx = cv.getContext("2d"), hero = cv.parentElement;
+    var W = 0, H = 0, dpr = 1, t = 0, mx = .5, run = true, bubbles = [];
+    var layers = [
+      { amp: 46, f: .0042, sp: .55, y: .60, a: .10, c: "47,107,255" },
+      { amp: 38, f: .0058, sp: -.7, y: .66, a: .14, c: "39,211,255" },
+      { amp: 52, f: .0034, sp: .45, y: .72, a: .20, c: "47,107,255" },
+      { amp: 30, f: .0072, sp: -.9, y: .79, a: .26, c: "27,70,214" },
+      { amp: 24, f: .0090, sp: .8,  y: .86, a: .34, c: "10,40,130" }
+    ];
+    function size(){
+      dpr = Math.min(2, window.devicePixelRatio || 1);
+      W = hero.clientWidth; H = hero.clientHeight;
+      cv.width = W * dpr; cv.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      bubbles = []; var n = Math.round(W / 28);
+      for (var i = 0; i < n; i++) bubbles.push({ x: Math.random() * W, y: H * (.4 + Math.random() * .6), r: .6 + Math.random() * 2.2, v: .12 + Math.random() * .4, p: Math.random() * 6 });
+    }
+    function wave(L, i){
+      var base = H * L.y, a = L.amp * (1 + (mx - .5) * .5);
+      ctx.beginPath(); ctx.moveTo(0, H);
+      for (var x = 0; x <= W; x += 8) {
+        var y = base + Math.sin(x * L.f + t * L.sp + i) * a + Math.sin(x * L.f * 2.3 - t * L.sp * .6) * a * .3;
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(W, H); ctx.closePath();
+      var g = ctx.createLinearGradient(0, base - a, 0, H);
+      g.addColorStop(0, "rgba(" + L.c + "," + L.a + ")"); g.addColorStop(1, "rgba(4,10,24,0)");
+      ctx.fillStyle = g; ctx.fill();
+      ctx.beginPath();
+      for (var x2 = 0; x2 <= W; x2 += 8) {
+        var y2 = base + Math.sin(x2 * L.f + t * L.sp + i) * a + Math.sin(x2 * L.f * 2.3 - t * L.sp * .6) * a * .3;
+        x2 === 0 ? ctx.moveTo(x2, y2) : ctx.lineTo(x2, y2);
+      }
+      ctx.strokeStyle = "rgba(" + L.c + "," + Math.min(.9, L.a * 2.6) + ")"; ctx.lineWidth = 1.5; ctx.stroke();
+    }
+    function frame(){
+      ctx.clearRect(0, 0, W, H);
+      layers.forEach(wave);
+      bubbles.forEach(function(b){
+        b.y -= b.v; b.x += Math.sin(t + b.p) * .15;
+        if (b.y < H * .3) { b.y = H + 6; b.x = Math.random() * W; }
+        ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 6.283);
+        ctx.fillStyle = "rgba(180,230,255," + (.15 + b.r * .12) + ")"; ctx.fill();
+      });
+    }
+    function loop(){ if (!run) return; t += .016; frame(); requestAnimationFrame(loop); }
+    size(); frame();
+    window.addEventListener("resize", function(){ size(); frame(); });
+    hero.addEventListener("pointermove", function(e){ mx = e.clientX / Math.max(1, W); }, { passive: true });
+    if (reduce) return;
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function(es){ var v = es[0].isIntersecting; if (v && !run) { run = true; loop(); } run = v; }, { threshold: 0 }).observe(hero);
+    }
+    document.addEventListener("visibilitychange", function(){ if (document.hidden) run = false; else if (!run) { run = true; loop(); } });
+    loop();
+  })();
+})();
+</script>
+</body>
+</html>
